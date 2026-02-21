@@ -1,0 +1,19 @@
+# Author: Farshad Heravi (f.n.heravi@gmail.com)
+# Project: ROS1-ROS2 Bridge (Noetic & Humble)
+# Repo: https://github.com/farshad-heravi/ros_bridge
+# Description: Docker Compose file for building a container with both ROS Noetic and ROS Humble for bridge purposes.
+
+services:
+  ros1-bridge:
+    build: .
+    image: fnh_ros_bridge:noetic-humble
+    container_name: ros1_bridge
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=127.0.0.1
+    volumes:
+      - ./bridge_entrypoint.sh:/bridge_entrypoint.sh:ro
+    entrypoint: ["/bridge_entrypoint.sh"]

@@ -1,0 +1,84 @@
+# Author: Farshad Heravi (f.n.heravi@gmail.com)
+# Project: ROS1-ROS2 Bridge (Noetic & Humble)
+# Repo: https://github.com/farshad-heravi/ros_bridge
+# Description: Docker Compose file for building a container with both ROS Noetic and ROS Humble for bridge purposes.
+
+services:
+  ros1-master:
+    image: ros:noetic-ros-core
+    container_name: ros1_master
+    command: roscore
+    network_mode: host
+    environment:
+      - ROS_HOSTNAME=localhost
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=127.0.0.1
+  
+  ros1-talker:
+    image: ros:noetic-ros-core
+    container_name: ros1_talker
+    command: >
+      bash -c "sleep 3 && source /opt/ros/noetic/setup.bash && rostopic pub -r 10 /chatter_1 std_msgs/String \"data: 'hello world from ros noetic'\""
+    network_mode: host
+    depends_on:
+      - ros1-master
+    environment:
+      - ROS_HOSTNAME=localhost
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=127.0.0.1
+  
+  ros2-talker:
+    image: ros:humble-ros-core
+    container_name: ros2_talker
+    command: >
+      bash -c "sleep 3 && source /opt/ros/humble/setup.bash && ros2 topic pub /chatter_2 std_msgs/msg/String \"data: 'hello world from ros humble'\""
+    network_mode: host
+    environment:
+      - ROS_HOSTNAME=localhost
+      - ROS_MASTER_URI=http://localhost:11311
+  
+  ros1-listener:
+    image: ros:noetic-ros-core
+    container_name: ros1_listener
+    command: >
+      bash -c "sleep 5 && source /opt/ros/noetic/setup.bash && rostopic echo /chatter_2"
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - ros1-bridge
+      - ros2-talker
+    environment:
+      - ROS_HOSTNAME=localhost
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=127.0.0.1
+
+  ros2-listener:
+    image: ros:humble-ros-core
+    container_name: ros2_listener
+    command: >
+      bash -c "sleep 5 && source /opt/ros/humble/setup.bash && ros2 topic echo /chatter_1 std_msgs/msg/String"
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - ros1-bridge
+      - ros1-talker
+    environment:
+      - ROS_DOMAIN_ID=0
+
+  ros1-bridge:
+    build: .
+    image: fnh_ros_bridge:noetic-humble
+    container_name: ros1_bridge
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - ros1-master
+    environment:
+      - ROS_MASTER_URI=http://localhost:11311
+      - ROS_IP=127.0.0.1
+    volumes:
+      - ./bridge_entrypoint.sh:/bridge_entrypoint.sh:ro
+    entrypoint: ["/bridge_entrypoint.sh"]
