@@ -27,18 +27,19 @@ RUN apt update && \
 	curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb" && \
 	dpkg -i /tmp/ros2-apt-source.deb && \
     rm /tmp/ros2-apt-source.deb && \
-	apt-get install -y --no-install-recommends \
+	apt update && apt-get install -y --no-install-recommends \
 	python3-flake8-docstrings \
 	python3-pip \
 	python3-pytest-cov \
-	ros-dev-tools && \
+	ros-dev-tools \
 	libopencv-imgproc-dev \
 	libacl1-dev \
 	libtinyxml2-dev \
 	libssl-dev \
 	libldap2-dev \
 	libasio-dev \
-	libeigen3-dev && \
+	libeigen3-dev \
+	python3-dev && \
 	rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install -U \
@@ -63,6 +64,28 @@ RUN rosdep init && rosdep update && \
     rm -rf /var/lib/apt/lists/*
 RUN cd ~/ros2_humble/ && \
 	colcon build --packages-up-to rclcpp ros2cli tf2_ros && \
+	colcon build --packages-select diagnostic_msgs && \
+	colcon build --packages-select \
+		ros2cli \
+		ros2run \
+		ros2pkg \
+		ros2node \
+		ros2topic \
+		ros2service \
+		ros2param \
+		ros2launch \
+		ros2interface \
+		ros2action \
+		ros2lifecycle \
+		ros2component \
+		ros2doctor \
+		ros2multicast \
+		std_srvs \
+		rosidl_runtime_py \
+		launch_ros \
+		launch_testing_ros \
+		ros2cli_test_interfaces \
+		ros2lifecycle_test_fixtures && \ 
 	rm -rf src build log
 
 
@@ -95,7 +118,7 @@ RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && \
 
 RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && \
                   source /root/ros2_humble/install/setup.bash && \
-                  colcon build --packages-select ros1_bridge --cmake-force-configure || true && \
+                  colcon build --packages-select ros1_bridge --cmake-force-configure && \
                   rm -rf src build log"
 
 COPY bridge_entrypoint.sh /bridge_entrypoint.sh

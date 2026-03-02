@@ -9,6 +9,8 @@ services:
     container_name: ros1_master
     command: roscore
     network_mode: host
+    ipc: host
+    pid: host
     environment:
       - ROS_HOSTNAME=localhost
       - ROS_MASTER_URI=http://localhost:11311
@@ -20,6 +22,8 @@ services:
     command: >
       bash -c "sleep 3 && source /opt/ros/noetic/setup.bash && rostopic pub -r 10 /chatter_1 std_msgs/String \"data: 'hello world from ros noetic'\""
     network_mode: host
+    ipc: host
+    pid: host
     depends_on:
       - ros1-master
     environment:
@@ -30,6 +34,8 @@ services:
   ros2-talker:
     image: ros:humble-ros-core
     container_name: ros2_talker
+    ipc: host
+    pid: host
     command: >
       bash -c "sleep 3 && source /opt/ros/humble/setup.bash && ros2 topic pub /chatter_2 std_msgs/msg/String \"data: 'hello world from ros humble'\""
     network_mode: host
