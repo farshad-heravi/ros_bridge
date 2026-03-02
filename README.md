@@ -1,8 +1,5 @@
 # ROS1-ROS2 Bridge (Noetic & Humble)
 
-**Author:** Farshad Heravi (f.n.heravi@gmail.com)  
-**Repo:** [https://github.com/farshad-heravi/ros_bridge](https://github.com/farshad-heravi/ros_bridge)
-
 This repository provides a Dockerized environment for bridging **ROS 1 Noetic** and **ROS 2 Humble**. Since these two ROS distributions are typically supported on different Ubuntu distributions (Ubuntu 20.04 Focal for Noetic and Ubuntu 22.04 Jammy for Humble), this project uses a custom Dockerfile based on Ubuntu 20.04. It installs ROS 1 Noetic from standard repositories, builds ROS 2 Humble from source, and finally builds the `ros1_bridge` package to enable bidirectional communication between the two ROS distributions.
 
 ## Features
